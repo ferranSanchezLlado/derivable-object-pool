@@ -5,28 +5,30 @@ use std::sync::{Mutex, MutexGuard};
 
 pub use object_pool_derive::ObjectPool;
 
-pub trait ObjectPool: Default {
+pub trait ObjectPool: Sized {
     fn pool<'a>() -> &'a Pool<Self>;
     #[inline]
     fn new() -> Reusable<Self> {
         let mut pool = Self::pool().get_pool();
-        match pool.is_empty() {
-            true => Reusable::new(Self::default()),
-            false => Reusable::new(pool.pop().unwrap()),
+        match pool.pop() {
+            Some(item) => Reusable::new(item),
+            None => Reusable::new((Self::pool().generator)()),
         }
     }
 }
 
 pub struct Pool<T> {
     pool: Mutex<Vec<T>>,
+    generator: fn() -> T,
 }
 
-impl<T: Default> Pool<T> {
+impl<T> Pool<T> {
     #[must_use]
     #[inline]
-    pub const fn new() -> Self {
+    pub const fn new(generator: fn() -> T) -> Self {
         Self {
             pool: Mutex::new(Vec::new()),
+            generator,
         }
     }
 }
@@ -43,6 +45,11 @@ impl<T> Pool<T> {
     }
 
     #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.get_pool().is_empty()
+    }
+
+    #[inline]
     pub fn insert(&self, item: T) {
         self.get_pool().push(item);
     }
@@ -50,6 +57,11 @@ impl<T> Pool<T> {
     #[inline]
     pub fn clear(&self) {
         self.get_pool().clear();
+    }
+
+    #[inline]
+    pub fn remove(&self) -> Option<T> {
+        self.get_pool().pop()
     }
 }
 
@@ -125,6 +137,10 @@ impl<T: ObjectPool> Drop for Reusable<T> {
     }
 }
 
+pub mod prelude {
+    pub use crate::{ObjectPool, Pool, Reusable};
+}
+
 #[cfg(test)]
 #[allow(unused)]
 mod tests {
@@ -152,5 +168,42 @@ mod tests {
         drop(obj2);
 
         assert_eq!(2, Test::pool().len());
+    }
+
+    #[derive(ObjectPool)]
+    #[generator(Test2::new_item)]
+    /// This is a different attribute: a comment, tests the macro ignores it properly
+    struct Test2 {
+        a: i32,
+        b: f64,
+        c: bool,
+        d: Vec<usize>,
+    }
+
+    impl Test2 {
+        fn new_item() -> Self {
+            Self {
+                a: 0,
+                b: 0.0,
+                c: false,
+                d: Vec::new(),
+            }
+        }
+    }
+
+    #[test]
+    fn new_objects_with_generator() {
+        let obj = Test2::new();
+        drop(obj);
+        assert_eq!(1, Test2::pool().len());
+
+        let obj = Test2::new();
+        assert_eq!(0, Test2::pool().len());
+        let obj2 = Test2::new();
+
+        drop(obj);
+        drop(obj2);
+
+        assert_eq!(2, Test2::pool().len());
     }
 }
