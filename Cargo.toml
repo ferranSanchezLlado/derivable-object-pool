@@ -15,4 +15,4 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-object-pool-derive = {path = "object-pool-derive"}
+derivable-object-pool-macros = {path = "derivable-object-pool-macros"}
