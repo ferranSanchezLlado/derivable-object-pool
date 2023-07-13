@@ -2,25 +2,25 @@
 
 This crate provides a trait that can be derived to implement an object pool
 for a type with a single line of code. Allowing the user to forget about
-the implementation details of the [`ObjectPool`](https://docs.rs/derivable-object-pool/trait.ObjectPool.html)
+the implementation details of the [`ObjectPool`](https://docs.rs/derivable-object-pool/latest/derivable_object_pool/trait.ObjectPool.html)
 and focus on the important parts of their code
 
 This crate has the following features compared to other object pool crates:
 - **Derivable**: The pool is simple to use and can be used with any type. Can 
-be just derived using the [`#[derive(ObjectPool)]`](https://docs.rs/derivable_object_pool/derive.ObjectPool.html)
+be just derived using the [`#[derive(ObjectPool)]`](https://docs.rs/derivable-object-pool/latest/derivable_object_pool/derive.ObjectPool.html)
 attribute macro.
-- **Reusable**: The user can use the [`ObjectPool::new`](https://docs.rs/derivable-object-pool/trait.ObjectPool.html#method.new)
+- **Reusable**: The user can use the [`ObjectPool::new`](https://docs.rs/derivable-object-pool/latest/derivable_object_pool/trait.ObjectPool.html#method.new)
 function to create objects from the pool, which will reuse objects from the pool
-if possible. This items are wrapped in a [`Reusable`](https://docs.rs/derivable-object-pool/struct.Reusable.html)
+if possible. This items are wrapped in a [`Reusable`](https://docs.rs/derivable-object-pool/latest/derivable_object_pool/struct.Reusable.html)
 struct, which will be returned to the pool when dropped.
 - **Thread Safe**: The pool is thread-safe (through the use of a [`Mutex`](https://doc.rust-lang.org/std/sync/struct.Mutex.html))
 and can be used in a multi-threaded environment.
 - **Simple**: The user doesn't need to create a pool for each type manually
-and can use the [`ObjectPool::new`](https://docs.rs/derivable-object-pool/trait.ObjectPool.html#method.new)
+and can use the [`ObjectPool::new`](https://docs.rs/derivable-object-pool/latest/derivable_object_pool/trait.ObjectPool.html#method.new)
 function to create objects from the pool.
 - **Flexible**: The user can configure the pool to use a custom generator
-function (see attributes in [`#[derive(ObjectPool)]`](https://docs.rs/derivable_object_pool/derive.ObjectPool.html))
-or just use the [`Default`](https://doc.rust-lang.org/std/default/trait.Default.html)
+function (see attributes in [`#[derive(ObjectPool)]`](https://docs.rs/derivable-object-pool/latest/derivable_object_pool/derive.ObjectPool.html))
+or just use the [`Default`](https://doc.rust-lang.org/std/default/latest/trait.Default.html)
 trait to create new objects.
 
 # Installation
@@ -29,7 +29,7 @@ Add the following to your `Cargo.toml` file:
 
 ```toml
 [dependencies]
-derivable-object-pool = "0.1.0"
+derivable-object-pool = "0.1.1"
 ```
 
 # Usage
@@ -78,6 +78,10 @@ fn main() {
     assert_eq!(obj.0, 11); 
 }
 ```
+
+# Documentation
+
+The documentation can be found [here](https://docs.rs/derivable-object-pool/latest/derivable_object_pool/).
 
 # License
 
