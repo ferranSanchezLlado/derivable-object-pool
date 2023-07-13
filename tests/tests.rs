@@ -1,7 +1,6 @@
 #![allow(unused)]
 use derivable_object_pool::prelude::*;
 
-
 #[derive(Default, ObjectPool)]
 struct Test {
     a: u32,

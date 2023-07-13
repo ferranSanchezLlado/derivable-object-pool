@@ -1,13 +1,13 @@
 //! # Derivable Object Pool
-//! 
+//!
 //! This crate provides a trait that can be derived to implement an object pool
 //! for a type with a single line of code. Allowing the user to forget about
 //! the implementation details of the [`ObjectPool`] and focus on the important
 //! parts of their code
-//! 
+//!
 //! This crate has the following features compared to other object pool crates:
-//! - **Derivable**: The pool is simple to use and can be used with any type. Can 
-//! be just derived using the [`#[derive(ObjectPool)]`](derive@ObjectPool) 
+//! - **Derivable**: The pool is simple to use and can be used with any type. Can
+//! be just derived using the [`#[derive(ObjectPool)]`](derive@ObjectPool)
 //! attribute macro.
 //! - **Reusable**: The user can use the [`ObjectPool::new`] function to create
 //! objects from the pool, which will reuse objects from the pool if possible.
@@ -21,15 +21,15 @@
 //! - **Flexible**: The user can configure the pool to use a custom generator
 //! function (see attributes in [`#[derive(ObjectPool)]`](derive@ObjectPool)) or
 //! just use the [`Default`] trait to create new objects.
-//! 
+//!
 //! # Example
-//! 
+//!
 //! ```
 //! use derivable_object_pool::prelude::*;
-//! 
+//!
 //! #[derive(Default, ObjectPool)]
 //! struct Test(i32);
-//! 
+//!
 //! fn main() {
 //!     let mut obj = Test::new();
 //!     obj.0 += 1;
@@ -38,7 +38,7 @@
 //!     assert_eq!(Test::pool().len(), 1);
 //!     let mut obj = Test::new();
 //!     assert_eq!(Test::pool().len(), 0);
-//!     assert_eq!(obj.0, 1); 
+//!     assert_eq!(obj.0, 1);
 //! }
 //! ```
 use std::borrow::{Borrow, BorrowMut};
@@ -52,43 +52,43 @@ pub use derivable_object_pool_macros::ObjectPool;
 /// objects that are expensive to create, but are used frequently. This trait
 /// can be derived using the `#[derive(ObjectPool)]` attribute macro (for more
 /// information, see the documentation for the [`ObjectPool`] trait)
-/// 
+///
 /// The new objects will be created using a generator function, which can be
 /// specified using the `#[generator(function_name)]` attribute macro on the
 /// struct. If no generator is specified, the trait will use the [`Default`]
 /// trait to create new objects.
-/// 
+///
 /// # Example
-/// 
+///
 /// Example without a generator:
 /// ```
 /// use derivable_object_pool::prelude::*;
-/// 
+///
 /// #[derive(Default, ObjectPool)]
 /// struct Test {
 ///     a: i32,
 ///     b: f64,
 /// }
-/// 
+///
 /// fn main() {
 ///     let obj = Test::new();
 ///     drop(obj); // obj is returned to the pool
 ///     let obj2 = Test::new(); // obj2 is the same object as obj
 /// }
 /// ```
-/// 
+///
 /// Example with a generator:
 /// ```
-/// 
+///
 /// use derivable_object_pool::prelude::*;
-/// 
+///
 /// #[derive(ObjectPool)]
 /// #[generator(Test::new_item)]
 /// struct Test {
 ///     a: i32,
 ///     b: f64,
 /// }
-/// 
+///
 /// impl Test {
 ///     fn new_item() -> Self {
 ///         Self {
@@ -97,7 +97,7 @@ pub use derivable_object_pool_macros::ObjectPool;
 ///         }
 ///     }
 /// }
-/// 
+///
 /// fn main() {
 ///     let obj = Test::new();
 ///     drop(obj); // obj is returned to the pool
@@ -107,14 +107,14 @@ pub use derivable_object_pool_macros::ObjectPool;
 pub trait ObjectPool: Sized {
     /// Returns a reference to the pool for this type of object. This allows
     /// you to interact with the pool directly, if you need to.
-    /// 
+    ///
     /// # Example
     /// ```
     /// use derivable_object_pool::prelude::*;
-    /// 
+    ///
     /// #[derive(Default, ObjectPool)]
     /// struct Test;
-    /// 
+    ///
     /// fn main() {
     ///     let pool = Test::pool();
     ///     assert_eq!(pool.len(), 0);
@@ -128,16 +128,16 @@ pub trait ObjectPool: Sized {
     fn pool<'a>() -> &'a Pool<Self>;
 
     /// Creates a new object. If there are any objects in the pool, one of them
-    /// will be returned. Otherwise, a new object will be created using the 
+    /// will be returned. Otherwise, a new object will be created using the
     /// generator function.
-    /// 
+    ///
     /// # Example
     /// ```
     /// use derivable_object_pool::prelude::*;
-    /// 
+    ///
     /// #[derive(Default, ObjectPool)]
     /// struct Test(i32);
-    /// 
+    ///
     /// fn main() {
     ///     let mut obj = Test::new();
     ///     assert_eq!(obj.0, 0);
@@ -162,26 +162,26 @@ pub trait ObjectPool: Sized {
 /// expensive to create, but are used frequently. This struct can be created
 /// using the [`Pool::new`] function. However, it is highly recommended that
 /// you use the [`ObjectPool`] trait instead, as it is much easier to use.
-/// 
-/// 
+///
+///
 /// # Example
-/// 
+///
 /// Example without deriving [`ObjectPool`]:
-/// 
+///
 /// ```
 /// use derivable_object_pool::prelude::*;
-/// 
+///
 /// #[derive(Default)]
 /// struct Test;
-/// 
+///
 /// static POOL: Pool<Test> = Pool::new(Test::default);
-/// 
+///
 /// impl ObjectPool for Test {
 ///     fn pool<'a>() -> &'a Pool<Self> {
 ///         &POOL
 ///     }
 /// }
-/// 
+///
 /// fn main() {
 ///    let obj = Test::new();
 ///    drop(obj); // obj is returned to the pool
@@ -259,29 +259,29 @@ impl<T: ObjectPool> Pool<T> {
 
 /// A wrapper for an object that will return the object to the pool when it is
 /// dropped. This is useful for objects that are expensive to create, but are
-/// used frequently. This struct can be created using the 
+/// used frequently. This struct can be created using the
 /// [`Pool::remove_reusable`] function. However, it is highly recommended that
 /// you use the [`ObjectPool::new`] function instead, as it will reuse objects
 /// from the pool if possible.
-/// 
+///
 /// The object implements [`Deref`] and [`DerefMut`] to allow you to access the
 /// object inside the wrapper. It also implements [`Borrow`] and [`BorrowMut`]
 /// to allow you to access the object inside the wrapper immutably or mutably.
 /// Finally, it implements [`AsRef`] and [`AsMut`] to allow you to access the
 /// object inside the wrapper immutably or mutably.
-/// 
+///
 /// # Example
-/// 
+///
 /// ```
 /// use derivable_object_pool::prelude::*;
-/// 
+///
 /// #[derive(Default, ObjectPool)]
 /// struct Test(i32);
-/// 
+///
 /// fn test(obj: &mut Test) {
 ///     obj.0 += 1;
 /// }
-/// 
+///
 /// fn main() {
 ///    let mut obj = Test::new();
 ///    assert_eq!(obj.0, 0);
@@ -289,7 +289,7 @@ impl<T: ObjectPool> Pool<T> {
 ///    assert_eq!(obj.0, 1);
 /// }
 /// ```
-#[repr(transparent)] 
+#[repr(transparent)]
 pub struct Reusable<T: ObjectPool> {
     /// The wrapped object. This is a `ManuallyDrop` to ensure that the object
     /// is not dropped when the wrapper is dropped.
@@ -362,8 +362,7 @@ impl<T: ObjectPool> DerefMut for Reusable<T> {
 impl<T: ObjectPool> Drop for Reusable<T> {
     #[inline]
     fn drop(&mut self) {
-        T::pool()
-            .insert(unsafe { ManuallyDrop::take(&mut self.item) });
+        T::pool().insert(unsafe { ManuallyDrop::take(&mut self.item) });
     }
 }
 
